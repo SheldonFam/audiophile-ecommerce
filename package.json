@@ -2,9 +2,6 @@
   "name": "audiophile",
   "private": true,
   "type": "module",
-  "imports": {
-    "#/*": "./src/*"
-  },
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
@@ -41,8 +38,11 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.20.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^30.0.1",
     "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
     "vitest": "^4.1.10"
