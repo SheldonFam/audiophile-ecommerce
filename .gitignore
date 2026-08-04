@@ -54,8 +54,13 @@ dist-ssr
 /playwright-report
 /.playwright
 
+# Agent working files
+/.scratch
+docs
+
 # Misc
 *.local
 __unconfig*
 todos.json
 claude.md
+coding_standards.md
