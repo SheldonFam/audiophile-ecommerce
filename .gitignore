@@ -64,3 +64,6 @@ __unconfig*
 todos.json
 claude.md
 coding_standards.md
+
+# Scratch output from the browser automation tools
+/.playwright-mcp

@@ -78,6 +78,15 @@
   --text-h5--letter-spacing: 1.7143px;
   --text-h5--font-weight: 700;
 
+  /* The category card's label is H6 on a desktop and 15px below it. Tracking
+     scales with the size — 1.2857 x 15/18 = 1.0714 — and so does the leading,
+     so this is H6 at the smaller step rather than a size override. Third of
+     its kind, after --text-h1-mobile and --text-h3-mobile. */
+  --text-h6-mobile: 15px;
+  --text-h6-mobile--line-height: 20px;
+  --text-h6-mobile--letter-spacing: 1.0714px;
+  --text-h6-mobile--font-weight: 700;
+
   --text-h6: 18px;
   --text-h6--line-height: 24px;
   --text-h6--letter-spacing: 1.2857px;
@@ -210,6 +219,7 @@
   .text-h4,
   .text-h5,
   .text-h6,
+  .text-h6-mobile,
   .text-overline,
   .text-subtitle,
   .text-nav {
