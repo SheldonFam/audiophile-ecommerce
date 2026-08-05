@@ -1,5 +1,116 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/manrope';
 
-@import "tailwindcss";
+/*
+ * Design tokens transcribed from the Figma design system frame (node 11:2).
+ * Type tokens are composite: one utility carries size, leading, tracking and
+ * weight, so `text-h1` in code means H1 in Figma. See ADR 0004.
+ *
+ * Letter-spacing values are Figma's computed pixel values. The frame's own
+ * labels round them (H2 reads "1,5px" but computes to 1.4286px); the computed
+ * value is what the design actually renders.
+ */
+@theme {
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Palette — the seven documented colours */
+  --color-orange: #d87d4a;
+  --color-orange-light: #fbaf85;
+  --color-black: #101010;
+  --color-grey: #f1f1f1;
+  --color-off-white: #fafafa;
+  --color-white: #ffffff;
+  --color-pure-black: #000000;
+
+  /* Component colours — used by the design system's form elements but absent
+     from its palette section */
+  --color-border: #cfcfcf;
+  --color-error: #cd2c2c;
+
+  /* Type scale */
+  --text-h1: 56px;
+  --text-h1--line-height: 58px;
+  --text-h1--letter-spacing: 2px;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 40px;
+  --text-h2--line-height: 44px;
+  --text-h2--letter-spacing: 1.4286px;
+  --text-h2--font-weight: 700;
+
+  --text-h3: 32px;
+  --text-h3--line-height: 36px;
+  --text-h3--letter-spacing: 1.1429px;
+  --text-h3--font-weight: 700;
+
+  --text-h4: 28px;
+  --text-h4--line-height: 38px;
+  --text-h4--letter-spacing: 2px;
+  --text-h4--font-weight: 700;
+
+  --text-h5: 24px;
+  --text-h5--line-height: 33px;
+  --text-h5--letter-spacing: 1.7143px;
+  --text-h5--font-weight: 700;
+
+  --text-h6: 18px;
+  --text-h6--line-height: 24px;
+  --text-h6--letter-spacing: 1.2857px;
+  --text-h6--font-weight: 700;
+
+  --text-overline: 14px;
+  --text-overline--line-height: 19px;
+  --text-overline--letter-spacing: 10px;
+  --text-overline--font-weight: 400;
+
+  --text-subtitle: 13px;
+  --text-subtitle--line-height: 25px;
+  --text-subtitle--letter-spacing: 0.9286px;
+  --text-subtitle--font-weight: 700;
+
+  --text-body: 15px;
+  --text-body--line-height: 25px;
+  --text-body--font-weight: 500;
+
+  /* Control type — smaller than the documented scale, used only by form
+     fields, buttons and the quantity stepper */
+  --text-label: 12px;
+  --text-label--letter-spacing: -0.2143px;
+  --text-label--font-weight: 700;
+
+  --text-input: 14px;
+  --text-input--letter-spacing: -0.25px;
+  --text-input--font-weight: 700;
+
+  --text-button: 13px;
+  --text-button--letter-spacing: 1px;
+  --text-button--font-weight: 700;
+
+  /* The desktop content column, measured from the 1440 artboards */
+  --container-content: 1110px;
+}
+
+/*
+ * Figma sets All Caps on every heading style, Overline and Subtitle. Tailwind's
+ * `--text-*` tokens have no slot for text-transform, so these utilities add it
+ * on top of the generated ones — keeping the ADR 0004 promise that one class
+ * applies the complete Figma style. Body, label and input styles are excluded
+ * because the design leaves those in sentence case.
+ *
+ * Override at a call site with `normal-case` when content is already uppercase.
+ */
+@layer components {
+  .text-h1,
+  .text-h2,
+  .text-h3,
+  .text-h4,
+  .text-h5,
+  .text-h6,
+  .text-overline,
+  .text-subtitle {
+    text-transform: uppercase;
+  }
+}
 
 * {
   box-sizing: border-box;
@@ -13,5 +124,7 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-black);
+  background: var(--color-white);
 }
-
