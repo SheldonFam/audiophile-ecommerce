@@ -117,6 +117,11 @@
   --text-input--font-weight: 700;
 
   --text-button: 13px;
+  /* Every button in the design measures 18 tall. Without this the line box is
+     whatever the font's metrics give — 19.5 with Manrope, something else
+     before it loads — so anything laid out around a button moved as the
+     webfont arrived. It was the only type token missing its leading. */
+  --text-button--line-height: 18px;
   --text-button--letter-spacing: 1px;
   --text-button--font-weight: 700;
 
@@ -128,6 +133,11 @@
   --text-nav--font-weight: 700;
 
   /* The desktop content column, measured from the 1440 artboards */
+  /* The header's height below the desktop breakpoint. The mobile menu opens
+     directly beneath it, so the two have to agree; they disagreed until the
+     header's height was stated, and a number in two files would drift again. */
+  --spacing-header: 90px;
+
   --container-content: 1110px;
 
   /* The width the design gives running prose inside that column, so a

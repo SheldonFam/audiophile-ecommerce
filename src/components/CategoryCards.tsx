@@ -42,10 +42,11 @@ export function CategoryCards({ onChoose }: { onChoose?: () => void }) {
             onClick={onChoose}
             className="group bg-grey flex h-full flex-col items-center rounded-lg px-6 pb-5.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black xl:pb-7.5"
           >
-            {/* A square box pulled above the card, as the design overlaps it
-                on the edge. The three files differ in height (422/408/380), so
-                object-bottom sits them on one baseline and lets their tops
-                stagger, which is how the design draws them.
+            {/* A box carrying the tallest file's aspect ratio — 438:422 — so
+                that file fills it exactly and the other two, being shorter,
+                letterbox. It is pulled above the card, as the design overlaps
+                it on the edge, and object-bottom sits all three on one baseline
+                and lets their tops stagger, which is how the design draws them.
 
                 The box is sized so the tallest lands on the design's height —
                 104 on a phone and tablet, 160 on a desktop. It used to be 200
@@ -61,7 +62,7 @@ export function CategoryCards({ onChoose }: { onChoose?: () => void }) {
             <span className="text-h6-mobile xl:text-h6 mt-auto pt-9">
               {category}
             </span>
-            <span className="text-button group-hover:text-orange-text group-focus-visible:text-orange-text mt-4.25 flex items-center gap-3 text-black/60 uppercase transition-colors xl:mt-3.75">
+            <span className="text-button group-hover:text-orange-text group-focus-visible:text-orange-text mt-4.25 flex items-center gap-3 text-black/60 uppercase transition-colors xl:mt-4">
               Shop
               <Chevron />
             </span>
