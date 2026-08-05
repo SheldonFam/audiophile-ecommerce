@@ -2,6 +2,7 @@
   "name": "audiophile",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.26.2",
   "engines": {
     "node": ">=22 <23"
   },

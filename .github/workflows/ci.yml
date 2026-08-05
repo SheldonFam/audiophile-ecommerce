@@ -10,6 +10,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Least privilege: this workflow only reads the repository.
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -18,9 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Version comes from the packageManager field in package.json, so CI
+      # runs the exact pnpm used locally rather than any 10.x.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       # Reads .nvmrc so CI and local development cannot drift (ADR 0003).
       - uses: actions/setup-node@v4
@@ -58,9 +62,13 @@ jobs:
 
       # CODING_STANDARDS.md bans arbitrary values: every value comes from a
       # design token. Nothing else enforces this.
+      #
+      # Matches a utility prefix followed by brackets — text-[13px], w-[50%],
+      # bg-[rgb(0,0,0)], grid-cols-[1fr_2fr] — rather than only px and hex.
+      # Array indexing in TypeScript has no leading hyphen, so it is not caught.
       - name: Assert no arbitrary Tailwind values
         run: |
-          if matches=$(grep -rnE '\[[0-9]+px\]|\[#[0-9a-fA-F]{6}\]' src/); then
+          if matches=$(grep -rnE '[a-z]-\[[^]]+\]' src/); then
             echo "::error::Arbitrary values found. Add a design token instead."
             echo "$matches"
             exit 1
