@@ -33,11 +33,12 @@ describe('getProduct', () => {
 
 describe('getProductsByCategory', () => {
   it('returns only products belonging to the category', () => {
+    // A Set, because this case is about membership and the next one is about
+    // order. Sorting the slugs here instead would have quietly made both cases
+    // blind to the order.
     expect(
-      getProductsByCategory('speakers')
-        .map((p) => p.slug)
-        .sort(),
-    ).toEqual(['zx7-speaker', 'zx9-speaker'])
+      new Set(getProductsByCategory('speakers').map((p) => p.slug)),
+    ).toEqual(new Set(['zx7-speaker', 'zx9-speaker']))
   })
 
   it('partitions every product into exactly one category', () => {
@@ -45,6 +46,18 @@ describe('getProductsByCategory', () => {
 
     expect(grouped).toHaveLength(6)
     expect(new Set(grouped.map((p) => p.slug)).size).toBe(6)
+  })
+
+  it('lists newest first, which is the order the category pages render', () => {
+    expect(getProductsByCategory('headphones').map((p) => p.slug)).toEqual([
+      'xx99-mark-two-headphones',
+      'xx99-mark-one-headphones',
+      'xx59-headphones',
+    ])
+    expect(getProductsByCategory('speakers').map((p) => p.slug)).toEqual([
+      'zx9-speaker',
+      'zx7-speaker',
+    ])
   })
 })
 
