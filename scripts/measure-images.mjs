@@ -114,7 +114,12 @@ export async function measureAssets() {
     const size = readImageSize(await readFile(absolute))
     if (!size) throw new Error(`could not read the size of ${absolute}`)
 
-    const webPath = `/assets/${relative(ASSETS, absolute).split(sep).join('/')}`
+    // Percent-encoded, because that is the form the catalogue stores after
+    // resolving a path, and this manifest is looked up by that exact string.
+    // Every asset is plain ASCII today, so this changes nothing now and stops
+    // one file with a space in its name from silently losing its dimensions.
+    const relativePath = relative(ASSETS, absolute).split(sep).join('/')
+    const webPath = encodeURI(`/assets/${relativePath}`)
     sizes[webPath] = size
   }
 

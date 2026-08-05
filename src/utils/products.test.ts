@@ -160,16 +160,26 @@ describe('includes', () => {
 })
 
 describe('parseProducts', () => {
+  const imageAt = (name: string) => ({
+    mobile: `./assets/${name}.jpg`,
+    tablet: `./assets/${name}.jpg`,
+    desktop: `./assets/${name}.jpg`,
+  })
+
   const valid = {
     id: 1,
     slug: 'a-product',
     name: 'A Product',
-    image: { mobile: './assets/a.jpg', tablet: './b.jpg', desktop: './c.jpg' },
+    image: {
+      mobile: './assets/a.jpg',
+      tablet: './assets/b.jpg',
+      desktop: './assets/c.jpg',
+    },
     category: 'speakers',
     categoryImage: {
       mobile: './assets/a.jpg',
-      tablet: './b.jpg',
-      desktop: './c.jpg',
+      tablet: './assets/b.jpg',
+      desktop: './assets/c.jpg',
     },
     new: false,
     price: 100,
@@ -177,9 +187,9 @@ describe('parseProducts', () => {
     features: 'f',
     includes: [{ quantity: 1, item: 'thing' }],
     gallery: {
-      first: { mobile: './1.jpg', tablet: './1.jpg', desktop: './1.jpg' },
-      second: { mobile: './2.jpg', tablet: './2.jpg', desktop: './2.jpg' },
-      third: { mobile: './3.jpg', tablet: './3.jpg', desktop: './3.jpg' },
+      first: imageAt('1'),
+      second: imageAt('2'),
+      third: imageAt('3'),
     },
     others: [],
   }
@@ -206,13 +216,66 @@ describe('parseProducts', () => {
     expect(() => parseProducts([missingPrice])).toThrow(/price/)
   })
 
-  it('rejects an image path that would stay relative', () => {
+  /**
+   * A path is checked by resolving it the way a browser will, not by looking at
+   * the characters it starts with. Each of these passes a `startsWith('/')`
+   * test and none of them points at a file on this site.
+   */
+  it.each([
+    ['a page-relative path', 'assets/no-leading-slash.jpg'],
+    ['a protocol-relative URL', '//evil.example/x.jpg'],
+    ['a backslash the URL parser reads as a slash', '/\\evil.example/x.jpg'],
+    ['an absolute URL to another origin', 'https://evil.example/x.jpg'],
+    ['a javascript: URL', 'javascript:alert(1)'],
+    ['a data: URL', 'data:image/png;base64,AAAA'],
+    ['a path that climbs out of assets', '/assets/../../etc/passwd'],
+    ['a path somewhere else on this site', '/not-assets/x.jpg'],
+    // The check resolves against placeholder origins to decide where a path
+    // points. Naming one of those origins in the data would pass a check that
+    // used only one of them, while the browser — resolving against the real
+    // site — fetched from somewhere else entirely.
+    ['the origin the check resolves against', '//first.invalid/assets/x.jpg'],
+    ['the second such origin', '//second.invalid/assets/x.jpg'],
+    ['the assets directory rather than a file in it', '/assets/'],
+    ['a directory that merely starts the same way', '/assetsfoo/x.jpg'],
+    // Resolution leaves percent-encoding alone, so this stays under /assets
+    // until something downstream decodes it.
+    ['traversal hidden in percent-encoding', '/assets/..%2f..%2fetc/passwd'],
+    ['a comma, which srcset would read as a separator', '/assets/a.jpg,/b.jpg'],
+  ])('rejects %s', (_name, path) => {
+    const broken = { ...valid, image: { ...valid.image, desktop: path } }
+
+    expect(() => parseProducts([broken])).toThrow(/does not resolve/)
+  })
+
+  it('falls back to the position in the file when the slug is what is wrong', () => {
+    // Nothing else can name the record: the slug is the label, and here it is
+    // the field that failed.
+    const { slug: _slug, ...noSlug } = valid
+
+    expect(() => parseProducts([noSlug])).toThrow(/0\.slug/)
+  })
+
+  it('names the product and the offending path when it rejects one', () => {
     const broken = {
       ...valid,
-      image: { ...valid.image, desktop: 'assets/no-leading-slash.jpg' },
+      image: { ...valid.image, desktop: '//evil.example/x.jpg' },
     }
 
-    expect(() => parseProducts([broken])).toThrow(/web root/)
+    expect(() => parseProducts([broken])).toThrow(
+      /a-product\.image\.desktop.*evil\.example/s,
+    )
+  })
+
+  it('keeps a path that stays inside assets after resolving', () => {
+    const winding = {
+      ...valid,
+      image: { ...valid.image, desktop: '/assets/one/../two.jpg' },
+    }
+
+    // Stored as what a browser would actually request, so the manifest lookup
+    // and the rendered src agree.
+    expect(parseProducts([winding])[0].image.desktop).toBe('/assets/two.jpg')
   })
 
   it('rejects a related product that does not exist, naming both', () => {
