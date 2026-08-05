@@ -34,9 +34,15 @@ export function Header() {
         overContent ? 'absolute inset-x-0 top-0 z-20' : 'bg-black'
       }`}
     >
-      {/* relative so the centred logo below md positions against this row
-          rather than the initial containing block. */}
-      <div className="max-w-content relative mx-auto flex items-center gap-6 border-b border-white/20 px-6 py-8 md:px-10 xl:px-0">
+      {/* The height is stated rather than left to the tallest child. Below md
+          the logo is taken out of flow to centre it, so it contributed nothing
+          and the menu button ended up deciding how tall the header was — 85
+          against the design's 90, with every page sitting that much high.
+          `min-h` rather than `h` so enlarged text still has somewhere to go.
+
+          relative so the centred logo positions against this row rather than
+          the initial containing block. */}
+      <div className="max-w-content relative mx-auto flex min-h-22.5 items-center gap-6 border-b border-white/20 px-6 md:px-10 xl:min-h-24.25 xl:px-0">
         <MobileMenu />
 
         <Link

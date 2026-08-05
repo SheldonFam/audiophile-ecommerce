@@ -6,6 +6,7 @@ import { CategoryCards } from '@/components/CategoryCards'
 import { QuantityStepper } from '@/components/QuantityStepper'
 import { ResponsiveImage } from '@/components/ResponsiveImage'
 import { formatPrice } from '@/utils/pricing'
+import { splitBeforeLastWord } from '@/utils/productName'
 import { getProduct } from '@/utils/products'
 
 export const Route = createFileRoute('/product/$slug')({
@@ -44,6 +45,7 @@ function ProductPage() {
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
   const [stackedTop, stackedBottom, tall] = product.gallery
+  const { lead, lastWord } = splitBeforeLastWord(product.name)
 
   return (
     <main className="max-w-content mx-auto px-6 pt-4 pb-30 md:px-10 md:pt-8 xl:px-0 xl:pt-20 xl:pb-40">
@@ -82,7 +84,14 @@ function ProductPage() {
             <p className="text-overline text-orange-text">New Product</p>
           )}
 
-          <h1 className="text-h4 xl:text-h2 mt-6">{product.name}</h1>
+          {/* The design sets a product name with its last word on its own
+              line here too. At this column the short names — XX59, ZX7, ZX9 —
+              fit on one, so wrapping alone would leave three of the six a line
+              short. Same rule as the listing, stated once. */}
+          <h1 className="text-h4 xl:text-h2 mt-6">
+            {lead}
+            <span className="block">{lastWord}</span>
+          </h1>
 
           <p className="text-body mt-6 text-black/60">{product.description}</p>
 
