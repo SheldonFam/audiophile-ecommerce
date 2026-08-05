@@ -37,20 +37,23 @@ const AssetPath = z
     'asset path must resolve from the web root',
   )
 
-const ResponsiveImage = z.object({
+/** The three crops every image in the challenge ships as. */
+const ImageSource = z.object({
   mobile: AssetPath,
   tablet: AssetPath,
   desktop: AssetPath,
 })
+
+export type ImageSource = z.infer<typeof ImageSource>
 
 /** A product as it appears in the JSON, with per-field normalisation applied. */
 const ParsedProduct = z.object({
   id: z.number(),
   slug: z.string(),
   name: z.string(),
-  image: ResponsiveImage,
+  image: ImageSource,
   category: z.enum(CATEGORIES),
-  categoryImage: ResponsiveImage,
+  categoryImage: ImageSource,
   new: z.boolean(),
   price: z.number(),
   description: z.string(),
@@ -59,13 +62,13 @@ const ParsedProduct = z.object({
   // Named slots in the source; an ordered list is what the design renders.
   gallery: z
     .object({
-      first: ResponsiveImage,
-      second: ResponsiveImage,
-      third: ResponsiveImage,
+      first: ImageSource,
+      second: ImageSource,
+      third: ImageSource,
     })
     .transform(({ first, second, third }) => [first, second, third]),
   others: z.array(
-    z.object({ slug: z.string(), name: z.string(), image: ResponsiveImage }),
+    z.object({ slug: z.string(), name: z.string(), image: ImageSource }),
   ),
 })
 
@@ -80,7 +83,7 @@ const ParsedProduct = z.object({
 const RelatedProduct = z.object({
   slug: z.string(),
   name: z.string(),
-  image: ResponsiveImage,
+  image: ImageSource,
   category: z.enum(CATEGORIES),
   price: z.number(),
 })
