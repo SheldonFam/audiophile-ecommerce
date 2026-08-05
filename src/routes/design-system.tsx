@@ -1,10 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@/components/Button'
+import { ResponsiveImage } from '@/components/ResponsiveImage'
 import { TextField } from '@/components/TextField'
+import { getProduct } from '@/utils/products'
+import type { ImageSource } from '@/utils/products'
 
 export const Route = createFileRoute('/design-system')({
   component: DesignSystem,
 })
+
+// Shared assets are not in products.json, so this triple is written by hand.
+// Annotated so it is checked against the same type the data module produces.
+const BEST_GEAR: ImageSource = {
+  mobile: '/assets/shared/mobile/image-best-gear.jpg',
+  tablet: '/assets/shared/tablet/image-best-gear.jpg',
+  desktop: '/assets/shared/desktop/image-best-gear.jpg',
+}
 
 const TYPE = [
   ['text-h1', 'H1 — 56/58, 2px'],
@@ -29,6 +40,8 @@ const COLORS = [
 ] as const
 
 function DesignSystem() {
+  const zx9 = getProduct('zx9-speaker')
+
   return (
     <main className="max-w-content mx-auto px-6 py-16">
       <h1 className="text-h4 mb-12">Design System</h1>
@@ -88,6 +101,33 @@ function DesignSystem() {
             error="Wrong format"
           />
         </div>
+      </section>
+
+      <section className="mt-16">
+        <h2 className="text-overline text-orange mb-8">05 Responsive Image</h2>
+        <p className="text-body mb-6 text-black/50">
+          Resize across 48rem and 80rem — the crop changes, not just the scale.
+          Below 48rem it is near-square, to 80rem a wide banner, above that
+          portrait.
+        </p>
+        <ResponsiveImage
+          image={BEST_GEAR}
+          alt=""
+          className="w-full rounded-lg object-cover"
+        />
+
+        {zx9 && (
+          <>
+            <p className="text-body mt-8 mb-6 text-black/50">
+              Consuming the product data module directly, with no reshaping:
+            </p>
+            <ResponsiveImage
+              image={zx9.image}
+              alt="ZX9 Speaker"
+              className="w-full max-w-sm rounded-lg"
+            />
+          </>
+        )}
       </section>
     </main>
   )
