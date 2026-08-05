@@ -63,6 +63,10 @@ export function ResponsiveImage({
     // img participate in the parent's layout directly rather than being
     // trapped in an inline wrapper with a baseline descender gap.
     //
+    // It also promotes the `source` children to layout items, and `source`
+    // computes to `display: block`, not `none` — inside a grid each one would
+    // silently claim a cell. `styles.css` hides them; do not remove that rule.
+    //
     // Keyed on the source so a route that reuses this instance — product to
     // related product — remounts rather than mutating srcset in place, which
     // Safari has historically not re-evaluated.

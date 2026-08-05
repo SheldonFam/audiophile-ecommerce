@@ -74,7 +74,10 @@ const ParsedProduct = z.object({
       second: ImageSource,
       third: ImageSource,
     })
-    .transform(({ first, second, third }) => [first, second, third]),
+    // `as const` so the type carries the arity too: the design places three
+    // images in three specific positions, and a plain array would let a
+    // fourth slot type-check into a layout that has nowhere to put it.
+    .transform(({ first, second, third }) => [first, second, third] as const),
   others: z.array(
     z.object({ slug: z.string(), name: z.string(), image: ImageSource }),
   ),

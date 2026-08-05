@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router'
-import type { ComponentProps, ReactNode } from 'react'
+import { createLink } from '@tanstack/react-router'
+import type { ComponentProps, ComponentPropsWithoutRef } from 'react'
 import { Chevron } from './Chevron'
 
 /**
@@ -45,25 +45,39 @@ export function Button({
   )
 }
 
-type ButtonLinkProps = {
+// `href` is omitted because createLink derives it from `to`/`params`; a caller
+// passing one directly would bypass the router and the type checking with it.
+type ButtonAnchorProps = {
   variant?: ButtonVariant
-  children?: ReactNode
-} & Omit<ComponentProps<typeof Link>, 'children'>
+} & Omit<ComponentPropsWithoutRef<'a'>, 'href'>
 
-/**
- * Same styling, rendered as a link. Navigation is a link, not a button —
- * middle-click and "open in new tab" have to keep working.
- */
-export function ButtonLink({
+function ButtonAnchor({
   variant = 'primary',
   className = '',
   children,
   ...props
-}: ButtonLinkProps) {
+}: ButtonAnchorProps) {
   return (
-    <Link className={`${base} ${variants[variant]} ${className}`} {...props}>
+    <a className={`${base} ${variants[variant]} ${className}`} {...props}>
       {children}
       {variant === 'tertiary' && <Chevron />}
-    </Link>
+    </a>
   )
 }
+
+/**
+ * Same styling, rendered as a link. Navigation is a link, not a button —
+ * middle-click and "open in new tab" have to keep working.
+ *
+ * Built with `createLink` rather than by wrapping `Link` directly. Wrapping it
+ * types the props as `ComponentProps<typeof Link>`, which erases the router's
+ * generics: `to` degrades to a plain string and `params` to a reducer, so
+ * linking to any route with a parameter fails to type-check. `createLink` is
+ * the supported way to keep a custom component's `to`/`params` checked against
+ * the real route tree.
+ *
+ * TanStack's example wraps the created link once more to inject defaults such
+ * as `preload`. There are none to inject here, so that wrapper would only
+ * delegate.
+ */
+export const ButtonLink = createLink(ButtonAnchor)
