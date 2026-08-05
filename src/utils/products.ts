@@ -30,13 +30,88 @@ export function isCategory(value: string): value is Category {
  * without it through unchanged, still relative, and it would 404 only on
  * nested addresses.
  */
+/**
+ * Two placeholder origins to resolve against. Nothing is fetched from either;
+ * they exist so a path can be asked where it points.
+ *
+ * There are two of them because one is not enough. A path that names its own
+ * host — `//assets.invalid/assets/x.jpg` — resolves to that host whatever base
+ * it is given, so a single sentinel can be spelled out in the data and pass its
+ * own check while the browser, resolving against the real site, fetches from
+ * somewhere else entirely. A genuinely site-relative path follows whichever
+ * base it is handed; one carrying its own authority does not. Comparing the two
+ * resolutions is what tells them apart.
+ *
+ * Both bases carry a path segment on purpose: that is what makes a
+ * page-relative path like `assets/x.jpg` resolve to `/somewhere/assets/x.jpg`
+ * and be rejected. Against a bare origin it would look like `/assets/x.jpg` and
+ * seem fine, while in the browser it would mean something different on every
+ * page — the bug ADR 0005 exists to prevent.
+ *
+ * `.invalid` is reserved by RFC 2606 and can never be registered.
+ */
+const ASSET_BASES = [
+  { origin: 'https://first.invalid', base: 'https://first.invalid/somewhere/' },
+  {
+    origin: 'https://second.invalid',
+    base: 'https://second.invalid/elsewhere/',
+  },
+] as const
+
+/** `/assets/` alone names a directory; a file needs something after it. */
+const ASSET_ROOT = '/assets/'
+
+/**
+ * Resolves a path the way a browser would, and returns it only if it names a
+ * file inside this site's own assets.
+ *
+ * Checking the characters a path starts with is not the same question.
+ * `//evil.example/x.jpg` starts with a slash and is a protocol-relative URL to
+ * another host; `/\evil.example/x.jpg` is parsed identically, because the URL
+ * standard treats a backslash as a slash. `/assets/../../etc/passwd` starts
+ * with `/assets/` and does not stay there. Only resolution answers all of them,
+ * and it answers them the way the browser will.
+ */
+function resolveInsideAssets(path: string): string | undefined {
+  let resolved
+  try {
+    resolved = ASSET_BASES.map(({ origin, base }) => ({
+      origin,
+      url: new URL(path, base),
+    }))
+  } catch {
+    return undefined
+  }
+
+  const [first, second] = resolved
+  if (first.url.origin !== first.origin) return undefined
+  if (second.url.origin !== second.origin) return undefined
+  if (first.url.pathname !== second.url.pathname) return undefined
+
+  const { pathname } = first.url
+  if (!pathname.startsWith(ASSET_ROOT)) return undefined
+  if (pathname.length === ASSET_ROOT.length) return undefined
+
+  // The resolved form, so what is stored is what a browser would request.
+  return pathname
+}
+
 const AssetPath = z
   .string()
   .transform((path) => path.replace(/^\.\//, '/'))
-  .refine(
-    (path) => path.startsWith('/'),
-    'asset path must resolve from the web root',
-  )
+  .transform((path, ctx) => {
+    const resolved = resolveInsideAssets(path)
+
+    if (resolved === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `"${path}" does not resolve to a file under /assets on this site`,
+      })
+      return z.NEVER
+    }
+
+    return resolved
+  })
 
 /** The three crops every image in the challenge ships as. */
 const ImageSource = z.object({
@@ -107,6 +182,24 @@ export type RelatedProduct = z.infer<typeof RelatedProduct>
 export type Product = z.infer<typeof Product>
 
 /**
+ * Names the record by its slug rather than by its position in the file, so a
+ * failure says which product is wrong instead of asking the reader to count.
+ * Falls back to the index when the slug is not itself readable — which is the
+ * case when the slug is the thing that failed.
+ */
+function describe(source: unknown, path: ReadonlyArray<PropertyKey>): string {
+  const [index, ...rest] = path
+  if (typeof index !== 'number' || !Array.isArray(source)) {
+    return path.join('.')
+  }
+
+  const slug: unknown = (source[index] as { slug?: unknown } | undefined)?.slug
+  const name = typeof slug === 'string' && slug ? slug : String(index)
+
+  return [name, ...rest].join('.')
+}
+
+/**
  * Validates and normalises. Exported so the failure path is testable: a
  * malformed record must fail loudly, naming the product and field, rather than
  * yielding a partial product.
@@ -117,7 +210,7 @@ export function parseProducts(source: unknown): Array<Product> {
   if (!result.success) {
     throw new Error(
       `products.json is malformed:\n${result.error.issues
-        .map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
+        .map((issue) => `  ${describe(source, issue.path)}: ${issue.message}`)
         .join('\n')}`,
     )
   }
