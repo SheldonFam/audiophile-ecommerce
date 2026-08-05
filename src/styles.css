@@ -86,6 +86,13 @@
   --text-button--letter-spacing: 1px;
   --text-button--font-weight: 700;
 
+  /* Header and footer navigation. Same size as Subtitle but with wider
+     tracking (2px vs 0.93px), so it is its own style rather than a reuse. */
+  --text-nav: 13px;
+  --text-nav--line-height: 25px;
+  --text-nav--letter-spacing: 2px;
+  --text-nav--font-weight: 700;
+
   /* The desktop content column, measured from the 1440 artboards */
   --container-content: 1110px;
 }
@@ -99,6 +106,26 @@
  *
  * Override at a call site with `normal-case` when content is already uppercase.
  */
+/*
+ * Focus indication. Two utilities because no single ring colour clears WCAG
+ * 1.4.11 on every surface in this palette (ADR 0010): black measures 1.0 on the
+ * dark header, orange measures 2.67 on grey. Reach for the one that matches the
+ * surface the control sits on rather than repeating the incantation.
+ */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-black);
+    outline-offset: 4px;
+  }
+}
+
+@utility focus-ring-on-dark {
+  &:focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 4px;
+  }
+}
+
 @layer components {
   .text-h1,
   .text-h2,
@@ -107,7 +134,8 @@
   .text-h5,
   .text-h6,
   .text-overline,
-  .text-subtitle {
+  .text-subtitle,
+  .text-nav {
     text-transform: uppercase;
   }
 }

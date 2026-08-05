@@ -21,7 +21,7 @@ const THUMBNAILS: Record<Category, string> = {
   earphones: '/assets/shared/desktop/image-category-thumbnail-earphones.png',
 }
 
-export function CategoryCards() {
+export function CategoryCards({ onChoose }: { onChoose?: () => void }) {
   return (
     // role="list" because Preflight removes the marker, and Safari then drops
     // the list role — so "list, 3 items" is never announced.
@@ -36,6 +36,10 @@ export function CategoryCards() {
             // Worded in the visible reading order, which is what a speech-input
             // user will say.
             aria-label={`${category} shop`}
+            // Lets a container react to a choice — the menu closes itself this
+            // way rather than watching the route or sniffing the DOM. Enter on
+            // a link fires click, so it covers the keyboard too.
+            onClick={onChoose}
             className="group bg-grey flex h-full flex-col items-center rounded-lg px-6 pb-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
           >
             {/* A fixed square box pulled above the card, as the design overlaps
