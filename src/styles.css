@@ -13,7 +13,8 @@
 @theme {
   --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
 
-  /* Palette — the seven documented colours */
+  /* Palette — the design system's colours, plus the few the frames use
+     without documenting: a small-text orange (ADR 0011) and a hover black */
   --color-orange: #d87d4a;
   /* Orange used as small text on a light surface. The brand value measures
      3.02 on white and 2.67 on grey, below the 4.5 that 1.4.3 requires for
@@ -21,6 +22,8 @@
   --color-orange-text: #a25e38;
   --color-orange-light: #fbaf85;
   --color-black: #101010;
+  /* The ZX9 panel's button, which is black on orange — see Button's `inverse`. */
+  --color-black-light: #4c4c4c;
   --color-grey: #f1f1f1;
   --color-off-white: #fafafa;
   --color-white: #ffffff;
@@ -36,6 +39,14 @@
   --text-h1--line-height: 58px;
   --text-h1--letter-spacing: 2px;
   --text-h1--font-weight: 700;
+
+  /* The hero and ZX9 headings are H1 from tablet up and 36px on a phone.
+     Tracking scales with the size — 2 x 36/56 = 1.2857 — so this is H1 at the
+     phone step, named per the ADR 0004 amendment rather than overridden. */
+  --text-h1-mobile: 36px;
+  --text-h1-mobile--line-height: 40px;
+  --text-h1-mobile--letter-spacing: 1.2857px;
+  --text-h1-mobile--font-weight: 700;
 
   --text-h2: 40px;
   --text-h2--line-height: 44px;
@@ -192,6 +203,7 @@
 
 @layer components {
   .text-h1,
+  .text-h1-mobile,
   .text-h2,
   .text-h3,
   .text-h3-mobile,
