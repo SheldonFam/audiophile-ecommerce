@@ -1,21 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { BestGear } from '@/components/BestGear'
 import { Button } from '@/components/Button'
+import { CategoryCards } from '@/components/CategoryCards'
 import { ResponsiveImage } from '@/components/ResponsiveImage'
 import { TextField } from '@/components/TextField'
 import { getProduct } from '@/utils/products'
-import type { ImageSource } from '@/utils/products'
 
 export const Route = createFileRoute('/design-system')({
   component: DesignSystem,
 })
-
-// Shared assets are not in products.json, so this triple is written by hand.
-// Annotated so it is checked against the same type the data module produces.
-const BEST_GEAR: ImageSource = {
-  mobile: '/assets/shared/mobile/image-best-gear.jpg',
-  tablet: '/assets/shared/tablet/image-best-gear.jpg',
-  desktop: '/assets/shared/desktop/image-best-gear.jpg',
-}
 
 const TYPE = [
   ['text-h1', 'H1 — 56/58, 2px'],
@@ -110,11 +103,13 @@ function DesignSystem() {
           Below 48rem it is near-square, to 80rem a wide banner, above that
           portrait.
         </p>
-        <ResponsiveImage
-          image={BEST_GEAR}
-          alt=""
-          className="w-full rounded-lg object-cover"
-        />
+        {zx9 && (
+          <ResponsiveImage
+            image={zx9.image}
+            alt=""
+            className="w-full rounded-lg object-cover"
+          />
+        )}
 
         {zx9 && (
           <>
@@ -128,6 +123,16 @@ function DesignSystem() {
             />
           </>
         )}
+      </section>
+
+      <section className="mt-16">
+        <h2 className="text-overline text-orange mb-8">06 Category Cards</h2>
+        <CategoryCards />
+      </section>
+
+      <section className="mt-24">
+        <h2 className="text-overline text-orange mb-8">07 Best Gear</h2>
+        <BestGear />
       </section>
     </main>
   )

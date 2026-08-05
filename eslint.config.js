@@ -20,6 +20,12 @@ export default [
 
   {
     rules: {
+      // Tailwind's Preflight sets `list-style: none` on every list, and Safari
+      // drops the list role when a list has no marker — so VoiceOver never
+      // announces "list, 3 items". `role="list"` restores it and is not
+      // redundant here, whatever the rule assumes.
+      'jsx-a11y/no-redundant-roles': 'off',
+
       'import/no-cycle': 'off',
       'import/order': 'off',
       'sort-imports': 'off',
