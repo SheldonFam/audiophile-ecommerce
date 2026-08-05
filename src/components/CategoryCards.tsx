@@ -40,21 +40,26 @@ export function CategoryCards({ onChoose }: { onChoose?: () => void }) {
             // way rather than watching the route or sniffing the DOM. Enter on
             // a link fires click, so it covers the keyboard too.
             onClick={onChoose}
-            className="group bg-grey flex h-full flex-col items-center rounded-lg px-6 pb-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
+            className="group bg-grey flex h-full flex-col items-center rounded-lg px-6 pb-5.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black xl:pb-7.5"
           >
-            {/* A fixed square box pulled above the card, as the design overlaps
-                it on the edge. The three thumbnails differ in height
-                (422/408/380), so object-bottom sits them all on the same
-                baseline and lets their tops stagger, which is how the design
-                draws them. */}
+            {/* A square box pulled above the card, as the design overlaps it
+                on the edge. The three files differ in height (422/408/380), so
+                object-bottom sits them on one baseline and lets their tops
+                stagger, which is how the design draws them.
+
+                The box is sized so the tallest lands on the design's height —
+                104 on a phone and tablet, 160 on a desktop. It used to be 200
+                on a desktop, which put 120 of the image inside the card where
+                the design puts 80, and made the card 16px too tall on every
+                page that shows it. */}
             <img
               src={THUMBNAILS[category]}
               alt=""
               loading="lazy"
-              className="-mt-13 h-32 w-32 object-contain object-bottom md:h-38 md:w-38 xl:-mt-20 xl:h-50 xl:w-50"
+              className="-mt-13 h-26 w-27 object-contain object-bottom xl:-mt-20 xl:h-40 xl:w-41.5"
             />
-            <span className="text-h6 mt-auto pt-4">{category}</span>
-            <span className="text-button group-hover:text-orange-text group-focus-visible:text-orange-text mt-4 flex items-center gap-3 text-black/60 uppercase transition-colors">
+            <span className="text-h6 mt-auto pt-9">{category}</span>
+            <span className="text-button group-hover:text-orange-text group-focus-visible:text-orange-text mt-4.25 flex items-center gap-3 text-black/60 uppercase transition-colors xl:mt-3.75">
               Shop
               <Chevron />
             </span>

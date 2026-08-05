@@ -1,5 +1,0 @@
-- generic [active] [ref=f19e1]:
-  - heading "srcset comma test" [level=1] [ref=f19e2]
-  - img "t" [ref=f19e4]
-  - img "t" [ref=f19e6]
-  - img "t" [ref=f19e7]
