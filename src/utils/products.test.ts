@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import rawProducts from '@/data/products.json'
 import {
   CATEGORIES,
   getProduct,
@@ -96,6 +97,51 @@ describe('related products', () => {
       for (const other of product.others) {
         expect(getProduct(other.slug)).toBeDefined()
       }
+    }
+  })
+})
+
+describe('features', () => {
+  it('arrive as paragraphs rather than one block of prose', () => {
+    expect(getProduct('yx1-earphones')!.features.length).toBeGreaterThan(1)
+  })
+
+  it('carry no leftover blank entries or surrounding whitespace', () => {
+    for (const product of CATEGORIES.flatMap(getProductsByCategory)) {
+      for (const paragraph of product.features) {
+        expect(paragraph).toBe(paragraph.trim())
+        expect(paragraph).not.toBe('')
+      }
+    }
+  })
+
+  it('lose no words to the split', () => {
+    // Comparing against the source rather than spot-checking one phrase: an
+    // assertion that the joined text contains some word still passes if a
+    // whole paragraph is dropped.
+    for (const raw of rawProducts) {
+      const product = getProduct(raw.slug)!
+      const wordsIn = (text: string) => text.split(/\s+/).filter(Boolean).length
+
+      expect(product.features.reduce((n, p) => n + wordsIn(p), 0)).toBe(
+        wordsIn(raw.features),
+      )
+    }
+  })
+
+  it('give every paragraph a distinct value, which the render relies on for keys', () => {
+    for (const product of CATEGORIES.flatMap(getProductsByCategory)) {
+      expect(new Set(product.features).size).toBe(product.features.length)
+    }
+  })
+})
+
+describe('includes', () => {
+  it('names each item once per product, which the render relies on for keys', () => {
+    for (const product of CATEGORIES.flatMap(getProductsByCategory)) {
+      const names = product.includes.map((entry) => entry.item)
+
+      expect(new Set(names).size).toBe(names.length)
     }
   })
 })

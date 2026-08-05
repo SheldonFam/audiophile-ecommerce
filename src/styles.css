@@ -132,6 +132,15 @@
   }
 }
 
+/* A wide prose column beside a narrow list, as the product page sets Features
+   against In the Box. The design measures 635 and 350 inside the 1110 column,
+   so the ratio is stated rather than rounded to 2:1. Not a design token — there
+   is no token for a layout ratio — but named here so it is not an unexplained
+   pair of numbers in markup. */
+@utility grid-prose-aside {
+  grid-template-columns: 635fr 350fr;
+}
+
 @utility focus-ring {
   &:focus-visible {
     outline: 2px solid var(--color-black);
