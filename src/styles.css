@@ -15,6 +15,10 @@
 
   /* Palette — the seven documented colours */
   --color-orange: #d87d4a;
+  /* Orange used as small text on a light surface. The brand value measures
+     3.02 on white and 2.67 on grey, below the 4.5 that 1.4.3 requires for
+     text under 24px bold. See ADR 0011. */
+  --color-orange-text: #a25e38;
   --color-orange-light: #fbaf85;
   --color-black: #101010;
   --color-grey: #f1f1f1;
@@ -117,6 +121,17 @@
  * dark header, orange measures 2.67 on grey. Reach for the one that matches the
  * surface the control sits on rather than repeating the incantation.
  */
+/* The design draws the quantity as a plain number, so its input carries no
+   chrome. Kept here rather than as an arbitrary variant in markup. */
+@utility no-spinner {
+  appearance: textfield;
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}
+
 @utility focus-ring {
   &:focus-visible {
     outline: 2px solid var(--color-black);

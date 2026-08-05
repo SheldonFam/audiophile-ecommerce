@@ -53,7 +53,7 @@ export function CategoryCards({ onChoose }: { onChoose?: () => void }) {
               className="-mt-13 h-32 w-32 object-contain object-bottom md:h-38 md:w-38 xl:-mt-20 xl:h-50 xl:w-50"
             />
             <span className="text-h6 mt-auto pt-4">{category}</span>
-            <span className="text-button group-hover:text-orange group-focus-visible:text-orange mt-4 flex items-center gap-3 text-black/60 uppercase transition-colors">
+            <span className="text-button group-hover:text-orange-text group-focus-visible:text-orange-text mt-4 flex items-center gap-3 text-black/60 uppercase transition-colors">
               Shop
               <Chevron />
             </span>

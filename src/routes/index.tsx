@@ -22,7 +22,7 @@ function Home() {
             <Link
               to="/category/$category"
               params={{ category }}
-              className="text-h6 text-orange hover:underline"
+              className="text-h6 text-orange-text hover:underline"
             >
               {category}
             </Link>

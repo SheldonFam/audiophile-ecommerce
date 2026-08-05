@@ -8,7 +8,7 @@ export function NotFound() {
       <p className="text-body mb-8">
         We couldn&rsquo;t find what you were looking for.
       </p>
-      <Link to="/" className="text-h6 text-orange hover:underline">
+      <Link to="/" className="text-h6 text-orange-text hover:underline">
         Back to home
       </Link>
     </main>

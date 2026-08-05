@@ -19,7 +19,7 @@ const variants: Record<ButtonVariant, string> = {
   primary: 'h-12 w-40 bg-orange text-white hover:bg-orange-light',
   secondary:
     'h-12 w-40 border border-black text-black hover:bg-black hover:text-white',
-  tertiary: 'gap-3.5 text-black/60 hover:text-orange',
+  tertiary: 'gap-3.5 text-black/60 hover:text-orange-text',
 }
 
 type ButtonProps = {
