@@ -4,13 +4,14 @@ import raw from '@/data/products.json'
 /**
  * The single trusted way to read product data (ADR 0005).
  *
- * The challenge JSON has three shapes that are hostile to direct use, all
+ * The challenge JSON has four shapes that are hostile to direct use, all
  * resolved here once rather than at every call site:
  *
  *   - image paths are relative (`./assets/…`), which resolves against the
  *     current address and so breaks on nested routes
  *   - `gallery` is an object of named slots rather than something iterable
  *   - `others` embeds partial copies of products, missing category and price
+ *   - `features` is one string with blank lines standing in for paragraphs
  *
  * Parsing runs once at module load. Because content routes are prerendered,
  * that happens during the build and costs nothing at page load.
@@ -57,7 +58,14 @@ const ParsedProduct = z.object({
   new: z.boolean(),
   price: z.number(),
   description: z.string(),
-  features: z.string(),
+  // Prose with blank lines between paragraphs in the source. Split here so no
+  // component has to parse text, and the whole text survives the split.
+  features: z.string().transform((text) =>
+    text
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean),
+  ),
   includes: z.array(z.object({ quantity: z.number(), item: z.string() })),
   // Named slots in the source; an ordered list is what the design renders.
   gallery: z

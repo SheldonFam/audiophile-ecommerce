@@ -25,8 +25,7 @@ export const Route = createFileRoute('/product/$slug')({
  * reads it when wiring add-to-cart. Add-to-cart itself renders but does nothing
  * — no cart exists yet.
  *
- * Sections below this one (features, in the box, gallery, related products)
- * arrive in tickets 08 and 09.
+ * The gallery and related products arrive in ticket 09.
  */
 function ProductPage() {
   const product = Route.useLoaderData()
@@ -80,6 +79,41 @@ function ProductPage() {
             <Button variant="primary">Add to Cart</Button>
           </div>
         </div>
+      </div>
+
+      {/* Side by side only at desktop. The design keeps them stacked on tablet,
+          where two columns would leave the in-the-box list very narrow. */}
+      <div className="xl:grid-prose-aside mt-22 grid gap-22 xl:mt-40 xl:gap-31">
+        <section aria-labelledby="features">
+          <h2 id="features" className="text-h5 xl:text-h3">
+            Features
+          </h2>
+          {product.features.map((paragraph) => (
+            <p key={paragraph} className="text-body mt-6 text-black/60">
+              {paragraph}
+            </p>
+          ))}
+        </section>
+
+        <section aria-labelledby="in-the-box">
+          <h2 id="in-the-box" className="text-h5 xl:text-h3">
+            In the Box
+          </h2>
+          <ul role="list" className="mt-6 flex flex-col gap-2">
+            {product.includes.map((entry) => (
+              <li key={entry.item} className="flex gap-6">
+                {/* Trailing space inside the span, not between the two: as
+                    siblings they concatenate to "1xHeadphone unit" in the text
+                    content. It collapses visually, so the gap still does the
+                    spacing. */}
+                <span className="text-body text-orange-text w-6 shrink-0 font-bold">
+                  {`${entry.quantity}x `}
+                </span>
+                <span className="text-body text-black/60">{entry.item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </main>
   )
