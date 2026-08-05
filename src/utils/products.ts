@@ -25,22 +25,16 @@ export function isCategory(value: string): value is Category {
 }
 
 /**
- * Paths arrive relative to the JSON; the app serves them from the web root.
- * The refine is the point: rewriting `./` alone would let a path written
- * without it through unchanged, still relative, and it would 404 only on
- * nested addresses.
- */
-/**
  * Two placeholder origins to resolve against. Nothing is fetched from either;
  * they exist so a path can be asked where it points.
  *
  * There are two of them because one is not enough. A path that names its own
- * host — `//assets.invalid/assets/x.jpg` — resolves to that host whatever base
- * it is given, so a single sentinel can be spelled out in the data and pass its
- * own check while the browser, resolving against the real site, fetches from
- * somewhere else entirely. A genuinely site-relative path follows whichever
- * base it is handed; one carrying its own authority does not. Comparing the two
- * resolutions is what tells them apart.
+ * host resolves to that host whatever base it is given, so a single sentinel
+ * could be spelled out in the data — `//first.invalid/assets/x.jpg` — and pass
+ * its own check, while the browser, resolving against the real site, fetched
+ * from somewhere else entirely. A genuinely site-relative path follows
+ * whichever base it is handed; one carrying its own authority does not.
+ * Comparing the two resolutions is what tells them apart.
  *
  * Both bases carry a path segment on purpose: that is what makes a
  * page-relative path like `assets/x.jpg` resolve to `/somewhere/assets/x.jpg`
@@ -58,8 +52,16 @@ const ASSET_BASES = [
   },
 ] as const
 
-/** `/assets/` alone names a directory; a file needs something after it. */
-const ASSET_ROOT = '/assets/'
+/**
+ * What an asset path may be made of, after resolving.
+ *
+ * Resolution alone is not quite enough. The URL parser leaves percent-encoding
+ * intact, so `/assets/..%2f..%2fetc/passwd` resolves to itself and stays under
+ * `/assets/` — until something downstream decodes it. Naming the characters an
+ * asset may contain closes that, and rules out commas and quotes at the same
+ * time. Every file the challenge ships is well within it.
+ */
+const ASSET_PATH = /^\/assets\/[A-Za-z0-9._~/-]+$/
 
 /**
  * Resolves a path the way a browser would, and returns it only if it names a
@@ -89,8 +91,7 @@ function resolveInsideAssets(path: string): string | undefined {
   if (first.url.pathname !== second.url.pathname) return undefined
 
   const { pathname } = first.url
-  if (!pathname.startsWith(ASSET_ROOT)) return undefined
-  if (pathname.length === ASSET_ROOT.length) return undefined
+  if (!ASSET_PATH.test(pathname)) return undefined
 
   // The resolved form, so what is stored is what a browser would request.
   return pathname
@@ -187,16 +188,18 @@ export type Product = z.infer<typeof Product>
  * Falls back to the index when the slug is not itself readable — which is the
  * case when the slug is the thing that failed.
  */
-function describe(source: unknown, path: ReadonlyArray<PropertyKey>): string {
-  const [index, ...rest] = path
-  if (typeof index !== 'number' || !Array.isArray(source)) {
-    return path.join('.')
-  }
+function slugAt(source: unknown, index: number): string | undefined {
+  if (!Array.isArray(source)) return undefined
 
   const slug: unknown = (source[index] as { slug?: unknown } | undefined)?.slug
-  const name = typeof slug === 'string' && slug ? slug : String(index)
+  return typeof slug === 'string' && slug ? slug : undefined
+}
 
-  return [name, ...rest].join('.')
+function issueLabel(source: unknown, path: ReadonlyArray<PropertyKey>): string {
+  const [index, ...rest] = path
+  if (typeof index !== 'number') return path.join('.')
+
+  return [slugAt(source, index) ?? String(index), ...rest].join('.')
 }
 
 /**
@@ -210,7 +213,7 @@ export function parseProducts(source: unknown): Array<Product> {
   if (!result.success) {
     throw new Error(
       `products.json is malformed:\n${result.error.issues
-        .map((issue) => `  ${describe(source, issue.path)}: ${issue.message}`)
+        .map((issue) => `  ${issueLabel(source, issue.path)}: ${issue.message}`)
         .join('\n')}`,
     )
   }

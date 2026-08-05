@@ -238,10 +238,22 @@ describe('parseProducts', () => {
     ['the second such origin', '//second.invalid/assets/x.jpg'],
     ['the assets directory rather than a file in it', '/assets/'],
     ['a directory that merely starts the same way', '/assetsfoo/x.jpg'],
+    // Resolution leaves percent-encoding alone, so this stays under /assets
+    // until something downstream decodes it.
+    ['traversal hidden in percent-encoding', '/assets/..%2f..%2fetc/passwd'],
+    ['a comma, which srcset would read as a separator', '/assets/a.jpg,/b.jpg'],
   ])('rejects %s', (_name, path) => {
     const broken = { ...valid, image: { ...valid.image, desktop: path } }
 
     expect(() => parseProducts([broken])).toThrow(/does not resolve/)
+  })
+
+  it('falls back to the position in the file when the slug is what is wrong', () => {
+    // Nothing else can name the record: the slug is the label, and here it is
+    // the field that failed.
+    const { slug: _slug, ...noSlug } = valid
+
+    expect(() => parseProducts([noSlug])).toThrow(/0\.slug/)
   })
 
   it('names the product and the offending path when it rejects one', () => {
