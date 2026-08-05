@@ -41,6 +41,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Assert image dimensions match the files on disk
+        run: pnpm images --check
+
       - name: Test
         run: pnpm test
 

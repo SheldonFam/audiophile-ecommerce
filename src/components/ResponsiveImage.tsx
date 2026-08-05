@@ -1,4 +1,5 @@
 import type { ComponentProps } from 'react'
+import { dimensionsOf } from '@/utils/imageDimensions'
 import type { ImageSource } from '@/utils/products'
 
 /**
@@ -43,9 +44,11 @@ type ResponsiveImageProps = {
   alt: string
 } & Omit<
   ComponentProps<'img'>,
-  // src/srcSet/alt are owned by this component. width/height/sizes are refused
-  // because they cannot be right for three crops of different aspect ratios,
-  // and `sizes` is inert without `srcset` while implying it works.
+  // src/srcSet/alt are owned by this component, and so are width/height: a
+  // caller holds one pair and there are three crops, so whatever it passed
+  // would be wrong at two breakpoints out of three. The component supplies
+  // each crop's own measured size instead. `sizes` is refused separately —
+  // it is inert without `srcset` while implying it works.
   //
   // aria-hidden is refused because it would silently remove a meaningful image
   // from the accessibility tree, defeating the required-alt contract with no
@@ -71,18 +74,30 @@ export function ResponsiveImage({
     // related product — remounts rather than mutating srcset in place, which
     // Safari has historically not re-evaluated.
     <picture className="contents" key={image.mobile}>
-      {/* Ordered widest first: the browser takes the first matching source. */}
+      {/* Ordered widest first: the browser takes the first matching source.
+          Each carries its own crop's dimensions, not one ratio for all three:
+          `image-best-gear` is 2.30 wide on a tablet and 0.92 on a desktop, so a
+          single pair would reserve the wrong space at two breakpoints out of
+          three. Combined with Preflight's `height: auto`, the pair is read as
+          an aspect ratio and the box is held before the bytes arrive. */}
       <source
         media={`(min-width: ${BREAKPOINTS.desktop})`}
         srcSet={image.desktop}
+        {...dimensionsOf(image.desktop)}
       />
       <source
         media={`(min-width: ${BREAKPOINTS.tablet})`}
         srcSet={image.tablet}
+        {...dimensionsOf(image.tablet)}
       />
       {/* Spread first so alt and src cannot be overridden — otherwise a caller
           passing aria-hidden could silently defeat the required-alt contract. */}
-      <img {...props} src={image.mobile} alt={alt} />
+      <img
+        {...props}
+        src={image.mobile}
+        alt={alt}
+        {...dimensionsOf(image.mobile)}
+      />
     </picture>
   )
 }
