@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # Reads .nvmrc so CI and local development cannot drift (ADR 0003).
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # ADR 0001 commits this project to static generation. Prerendering
+      # silently producing nothing would break no test and pass every other
+      # check, so assert the output directly.
+      - name: Assert static HTML was generated
+        run: |
+          count=$(find dist -name '*.html' | wc -l | tr -d ' ')
+          echo "HTML files emitted: $count"
+          if [ "$count" -lt 10 ]; then
+            echo "::error::Expected at least 10 prerendered pages, found $count."
+            find dist -name '*.html' | sort
+            exit 1
+          fi
+
+      # CODING_STANDARDS.md bans arbitrary values: every value comes from a
+      # design token. Nothing else enforces this.
+      - name: Assert no arbitrary Tailwind values
+        run: |
+          if matches=$(grep -rnE '\[[0-9]+px\]|\[#[0-9a-fA-F]{6}\]' src/); then
+            echo "::error::Arbitrary values found. Add a design token instead."
+            echo "$matches"
+            exit 1
+          fi
+          echo "No arbitrary values."
