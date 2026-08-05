@@ -10,6 +10,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    // `scripts/` is included so build tooling is tested like anything else.
+    // It is plain JavaScript, run by node rather than bundled, so `.mjs` has
+    // to be listed alongside the application's extensions.
+    include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
   },
 })

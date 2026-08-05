@@ -22,9 +22,19 @@ const ROOT = process.cwd()
 const ASSETS = join(ROOT, 'public', 'assets')
 const MANIFEST = join(ROOT, 'src', 'data', 'image-dimensions.json')
 
-/** PNG puts width and height in the IHDR chunk, at a fixed offset. */
+/**
+ * PNG puts width and height in the IHDR chunk, at a fixed offset — but only if
+ * IHDR really is the first chunk, which the spec requires and a corrupt file
+ * need not honour. Checking the chunk name as well as the signature is what
+ * stops a file that merely starts like a PNG from yielding whatever the next
+ * four bytes happen to spell.
+ */
 function pngSize(bytes) {
+  if (bytes.length < 24) return undefined
   if (bytes.readUInt32BE(0) !== 0x89504e47) return undefined
+  if (bytes.readUInt32BE(4) !== 0x0d0a1a0a) return undefined
+  if (bytes.toString('latin1', 12, 16) !== 'IHDR') return undefined
+
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
 }
 
@@ -35,6 +45,7 @@ function pngSize(bytes) {
  * range that mean something else (DHT, JPG, DAC, DNL).
  */
 function jpegSize(bytes) {
+  if (bytes.length < 4) return undefined
   if (bytes.readUInt16BE(0) !== 0xffd8) return undefined
 
   let offset = 2
@@ -45,6 +56,12 @@ function jpegSize(bytes) {
     }
 
     const marker = bytes[offset + 1]
+
+    // Start of scan: everything after this is entropy-coded data, where a
+    // stray 0xFFC0 means nothing. Walking into it is how a file with no frame
+    // header ends up reporting 65535x65535 instead of reporting nothing.
+    if (marker === 0xda) return undefined
+
     const isStartOfFrame =
       marker >= 0xc0 &&
       marker <= 0xcf &&
@@ -69,8 +86,20 @@ function jpegSize(bytes) {
   return undefined
 }
 
+/**
+ * Nothing, rather than a guess, for anything that does not parse cleanly. The
+ * caller turns that into a failure — a dimension read out of the wrong bytes
+ * would sail into the manifest and out again as an attribute on the page.
+ */
 export function readImageSize(bytes) {
-  return pngSize(bytes) ?? jpegSize(bytes)
+  const size = pngSize(bytes) ?? jpegSize(bytes)
+  if (!size) return undefined
+
+  // JPEG stores each axis in two bytes and PNG in four, so these are the
+  // formats' own ceilings; a plausible-looking size well past any real asset
+  // is the shape a misparse takes.
+  const sane = (n) => Number.isInteger(n) && n > 0 && n <= 65535
+  return sane(size.width) && sane(size.height) ? size : undefined
 }
 
 /** Web paths, because that is what a call site holds. */
