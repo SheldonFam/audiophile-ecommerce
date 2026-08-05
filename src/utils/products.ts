@@ -148,6 +148,18 @@ export function getProduct(slug: string): Product | undefined {
   return productsBySlug.get(slug)
 }
 
+/**
+ * Newest first, which the design uses on every category page: headphones leads
+ * with XX99 Mark II and speakers with ZX9, both the reverse of the file's order.
+ * `id` is the catalogue's own sequence, so descending `id` is what "newest"
+ * means here — there is no date in the data to sort on.
+ *
+ * Sorted here rather than in the route so every listing agrees, and so a
+ * component never has to know the ordering rule. Sorting in place is safe:
+ * `filter` has already returned a new array, so the module's own is untouched.
+ */
 export function getProductsByCategory(category: Category): Array<Product> {
-  return products.filter((product) => product.category === category)
+  return products
+    .filter((product) => product.category === category)
+    .sort((a, b) => b.id - a.id)
 }
