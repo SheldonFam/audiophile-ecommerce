@@ -95,6 +95,11 @@
 
   /* The desktop content column, measured from the 1440 artboards */
   --container-content: 1110px;
+
+  /* The width the design gives running prose inside that column, so a
+     paragraph does not stretch the full 1110px. Named copy rather than prose
+     so it does not silently redefine Tailwind's own max-w-prose. */
+  --container-copy: 540px;
 }
 
 /*
