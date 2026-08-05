@@ -1,15 +1,19 @@
+import { z } from 'zod'
 import raw from '@/data/products.json'
 
 /**
- * Product access for routing.
+ * The single trusted way to read product data (ADR 0005).
  *
- * ADR 0005 decides that this module parses the challenge JSON through a schema
- * once at load and hands out normalised products. Ticket 02 builds that. Until
- * then this reads the JSON directly and returns only the two fields routing
- * needs.
+ * The challenge JSON has three shapes that are hostile to direct use, all
+ * resolved here once rather than at every call site:
  *
- * The accessor names are the ones ADR 0005 specifies, so ticket 02 widens what
- * they return rather than renaming them, and callers stay put.
+ *   - image paths are relative (`./assets/…`), which resolves against the
+ *     current address and so breaks on nested routes
+ *   - `gallery` is an object of named slots rather than something iterable
+ *   - `others` embeds partial copies of products, missing category and price
+ *
+ * Parsing runs once at module load. Because content routes are prerendered,
+ * that happens during the build and costs nothing at page load.
  */
 export const CATEGORIES = ['headphones', 'speakers', 'earphones'] as const
 
@@ -19,17 +23,117 @@ export function isCategory(value: string): value is Category {
   return (CATEGORIES as ReadonlyArray<string>).includes(value)
 }
 
-type ProductSummary = {
-  slug: string
-  name: string
+/**
+ * Paths arrive relative to the JSON; the app serves them from the web root.
+ * The refine is the point: rewriting `./` alone would let a path written
+ * without it through unchanged, still relative, and it would 404 only on
+ * nested addresses.
+ */
+const AssetPath = z
+  .string()
+  .transform((path) => path.replace(/^\.\//, '/'))
+  .refine(
+    (path) => path.startsWith('/'),
+    'asset path must resolve from the web root',
+  )
+
+const ResponsiveImage = z.object({
+  mobile: AssetPath,
+  tablet: AssetPath,
+  desktop: AssetPath,
+})
+
+/** A product as it appears in the JSON, with per-field normalisation applied. */
+const ParsedProduct = z.object({
+  id: z.number(),
+  slug: z.string(),
+  name: z.string(),
+  image: ResponsiveImage,
+  category: z.enum(CATEGORIES),
+  categoryImage: ResponsiveImage,
+  new: z.boolean(),
+  price: z.number(),
+  description: z.string(),
+  features: z.string(),
+  includes: z.array(z.object({ quantity: z.number(), item: z.string() })),
+  // Named slots in the source; an ordered list is what the design renders.
+  gallery: z
+    .object({
+      first: ResponsiveImage,
+      second: ResponsiveImage,
+      third: ResponsiveImage,
+    })
+    .transform(({ first, second, third }) => [first, second, third]),
+  others: z.array(
+    z.object({ slug: z.string(), name: z.string(), image: ResponsiveImage }),
+  ),
+})
+
+/**
+ * A related product, widened with the category and price its source copy omits.
+ *
+ * `name` is deliberately the source's short label — the design's related-product
+ * cards read "XX99 Mark I" where the canonical name is "XX99 Mark I Headphones".
+ * ADR 0005 speaks of names not drifting; this is a display distinction the
+ * design makes, not drift.
+ */
+const RelatedProduct = z.object({
+  slug: z.string(),
+  name: z.string(),
+  image: ResponsiveImage,
+  category: z.enum(CATEGORIES),
+  price: z.number(),
+})
+
+const Product = ParsedProduct.omit({ others: true }).extend({
+  others: z.array(RelatedProduct),
+})
+
+export type RelatedProduct = z.infer<typeof RelatedProduct>
+export type Product = z.infer<typeof Product>
+
+/**
+ * Validates and normalises. Exported so the failure path is testable: a
+ * malformed record must fail loudly, naming the product and field, rather than
+ * yielding a partial product.
+ */
+export function parseProducts(source: unknown): Array<Product> {
+  const result = z.array(ParsedProduct).safeParse(source)
+
+  if (!result.success) {
+    throw new Error(
+      `products.json is malformed:\n${result.error.issues
+        .map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
+        .join('\n')}`,
+    )
+  }
+
+  const bySlug = new Map(result.data.map((product) => [product.slug, product]))
+
+  return result.data.map((product) => ({
+    ...product,
+    others: product.others.map((other) => {
+      const canonical = bySlug.get(other.slug)
+      if (!canonical) {
+        throw new Error(
+          `products.json is malformed:\n  ${product.slug}.others: references unknown product "${other.slug}"`,
+        )
+      }
+      return { ...other, category: canonical.category, price: canonical.price }
+    }),
+  }))
 }
 
-export function getProduct(slug: string): ProductSummary | undefined {
-  return raw.find((product) => product.slug === slug)
+const products = parseProducts(raw)
+
+const productsBySlug = new Map(
+  products.map((product) => [product.slug, product]),
+)
+
+export function getProduct(slug: string): Product | undefined {
+  return productsBySlug.get(slug)
 }
 
-export function getProductsByCategory(
-  category: Category,
-): Array<ProductSummary> {
-  return raw.filter((product) => product.category === category)
+export function getProductsByCategory(category: Category): Array<Product> {
+  return products.filter((product) => product.category === category)
 }
