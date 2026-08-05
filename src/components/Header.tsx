@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { MobileMenu } from './MobileMenu'
 import { CATEGORIES } from '@/utils/products'
 
@@ -21,8 +21,19 @@ const navLink =
   'text-nav hover:text-orange focus-ring-on-dark transition-colors'
 
 export function Header() {
+  // Read from the matched route rather than from its path: the shell should not
+  // have to know which addresses happen to want this.
+  const overContent = useRouterState({
+    select: (state) =>
+      state.matches.some((match) => match.staticData.headerOverContent),
+  })
+
   return (
-    <header className="bg-black text-white">
+    <header
+      className={`text-white ${
+        overContent ? 'absolute inset-x-0 top-0 z-20' : 'bg-black'
+      }`}
+    >
       {/* relative so the centred logo below md positions against this row
           rather than the initial containing block. */}
       <div className="max-w-content relative mx-auto flex items-center gap-6 border-b border-white/20 px-6 py-8 md:px-10 xl:px-0">
