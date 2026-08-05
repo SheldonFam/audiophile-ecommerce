@@ -36,7 +36,7 @@ function CategoryPage() {
             <Link
               to="/product/$slug"
               params={{ slug: product.slug }}
-              className="text-h6 text-orange hover:underline"
+              className="text-h6 text-orange-text hover:underline"
             >
               {product.name}
             </Link>
