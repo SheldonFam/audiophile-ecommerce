@@ -50,6 +50,7 @@ export function CategoryCards({ onChoose }: { onChoose?: () => void }) {
             <img
               src={THUMBNAILS[category]}
               alt=""
+              loading="lazy"
               className="-mt-13 h-32 w-32 object-contain object-bottom md:h-38 md:w-38 xl:-mt-20 xl:h-50 xl:w-50"
             />
             <span className="text-h6 mt-auto pt-4">{category}</span>

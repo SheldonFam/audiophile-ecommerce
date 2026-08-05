@@ -41,6 +41,11 @@ export async function renderWithRouter(ui: ReactNode) {
       path: '/category/$category',
       component: Empty,
     }),
+    createRoute({
+      getParentRoute: () => rootRoute,
+      path: '/product/$slug',
+      component: Empty,
+    }),
   ])
 
   const router = createRouter({
@@ -48,9 +53,11 @@ export async function renderWithRouter(ui: ReactNode) {
     history: createMemoryHistory({ initialEntries: ['/'] }),
   })
 
-  // The cast sidesteps the module-augmented Register type, which points at
-  // the application's generated route tree rather than this throwaway one.
-  const result = render(<RouterProvider router={router as never} />)
+  // No cast: RouterProvider is generic over the router it is given, and the
+  // Register augmentation only supplies the default. `as never` would type-check
+  // by disabling the check, hiding any real mismatch between this throwaway
+  // tree and the routes under test.
+  const result = render(<RouterProvider router={router} />)
 
   // RouterProvider renders on a later tick, so a synchronous query straight
   // after render() sees an empty document. Await the first paint here rather

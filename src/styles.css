@@ -47,6 +47,16 @@
   --text-h3--letter-spacing: 1.1429px;
   --text-h3--font-weight: 700;
 
+  /* The section headings — Features, In the Box, You may also like — are H3
+     from tablet up and scale down on a phone. Tracking scales with the size
+     (1.1429 x 24/32 = 0.8571), so this is not `text-h3` with a size override.
+     Nor is it H5, which is also 24px but tracks 1.7143 and is what the
+     related-product card names use. Two 24px styles, different letter-spacing. */
+  --text-h3-mobile: 24px;
+  --text-h3-mobile--line-height: 36px;
+  --text-h3-mobile--letter-spacing: 0.8571px;
+  --text-h3-mobile--font-weight: 700;
+
   --text-h4: 28px;
   --text-h4--line-height: 38px;
   --text-h4--letter-spacing: 2px;
@@ -141,6 +151,14 @@
   grid-template-columns: 635fr 350fr;
 }
 
+/* The product gallery: two stacked images beside one tall one. The design
+   measures 445 and 635 inside the 1110 column. Same reasoning as
+   grid-prose-aside — a layout ratio has no design token, so it is named here
+   rather than written as an arbitrary value in markup. */
+@utility grid-gallery {
+  grid-template-columns: 445fr 635fr;
+}
+
 @utility focus-ring {
   &:focus-visible {
     outline: 2px solid var(--color-black);
@@ -155,10 +173,28 @@
   }
 }
 
+@layer base {
+  /* `picture` is `display: contents` (see ResponsiveImage) so a caller's
+     layout classes land on the img itself and take part in the parent's
+     layout. That promotes the picture's `source` children to layout items
+     too — and `source` computes to `display: block`, not `none`, so inside a
+     grid each one silently claims a cell. Three art-directed images in a
+     two-column grid became nine items across five rows, putting the second
+     image in the wrong column.
+
+     The HTML spec says source is never rendered; Preflight does not say it.
+     Scoped to picture, so it sits with the decision that needs it rather than
+     reaching for every source on the page. */
+  picture > source {
+    display: none;
+  }
+}
+
 @layer components {
   .text-h1,
   .text-h2,
   .text-h3,
+  .text-h3-mobile,
   .text-h4,
   .text-h5,
   .text-h6,
