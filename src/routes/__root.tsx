@@ -4,6 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { NotFound } from '@/components/NotFound'
+import { RouteAnnouncer } from '@/components/RouteAnnouncer'
 
 import appCss from '../styles.css?url'
 
@@ -40,7 +41,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Header />
-        {children}
+        <RouteAnnouncer>{children}</RouteAnnouncer>
         <Footer />
         <TanStackDevtools
           config={{
