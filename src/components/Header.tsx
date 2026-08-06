@@ -42,7 +42,7 @@ export function Header() {
 
           relative so the centred logo positions against this row rather than
           the initial containing block. */}
-      <div className="max-w-content relative mx-auto flex min-h-22.5 items-center gap-6 border-b border-white/20 px-6 md:px-10 xl:min-h-24.25 xl:px-0">
+      <div className="max-w-content min-h-header relative mx-auto flex items-center gap-6 border-b border-white/20 px-6 md:px-10 xl:min-h-24.25 xl:px-0">
         <MobileMenu />
 
         <Link

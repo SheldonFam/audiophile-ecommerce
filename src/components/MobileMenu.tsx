@@ -72,7 +72,7 @@ export function MobileMenu() {
           ref={dialog}
           aria-label="Categories"
           {...lightDismiss}
-          className="mt-22.5 w-full max-w-none rounded-b-lg bg-white px-6 pt-14 pb-9 text-black backdrop:bg-black/40 md:px-10"
+          className="mt-header w-full max-w-none rounded-b-lg bg-white px-6 pt-14 pb-9 text-black backdrop:bg-black/40 md:px-10"
         >
           <nav aria-label="Categories">
             <CategoryCards

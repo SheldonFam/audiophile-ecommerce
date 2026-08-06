@@ -78,6 +78,15 @@
   --text-h5--letter-spacing: 1.7143px;
   --text-h5--font-weight: 700;
 
+  /* The category card's label is H6 on a desktop and 15px below it. Tracking
+     scales with the size — 1.2857 x 15/18 = 1.0714 — and so does the leading,
+     so this is H6 at the smaller step rather than a size override. Third of
+     its kind, after --text-h1-mobile and --text-h3-mobile. */
+  --text-h6-mobile: 15px;
+  --text-h6-mobile--line-height: 20px;
+  --text-h6-mobile--letter-spacing: 1.0714px;
+  --text-h6-mobile--font-weight: 700;
+
   --text-h6: 18px;
   --text-h6--line-height: 24px;
   --text-h6--letter-spacing: 1.2857px;
@@ -108,6 +117,11 @@
   --text-input--font-weight: 700;
 
   --text-button: 13px;
+  /* Every button in the design measures 18 tall. Without this the line box is
+     whatever the font's metrics give — 19.5 with Manrope, something else
+     before it loads — so anything laid out around a button moved as the
+     webfont arrived. It was the only type token missing its leading. */
+  --text-button--line-height: 18px;
   --text-button--letter-spacing: 1px;
   --text-button--font-weight: 700;
 
@@ -119,6 +133,11 @@
   --text-nav--font-weight: 700;
 
   /* The desktop content column, measured from the 1440 artboards */
+  /* The header's height below the desktop breakpoint. The mobile menu opens
+     directly beneath it, so the two have to agree; they disagreed until the
+     header's height was stated, and a number in two files would drift again. */
+  --spacing-header: 90px;
+
   --container-content: 1110px;
 
   /* The width the design gives running prose inside that column, so a
@@ -210,6 +229,7 @@
   .text-h4,
   .text-h5,
   .text-h6,
+  .text-h6-mobile,
   .text-overline,
   .text-subtitle,
   .text-nav {
