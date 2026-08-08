@@ -5,6 +5,8 @@ import { Button, ButtonLink } from '@/components/Button'
 import { CategoryCards } from '@/components/CategoryCards'
 import { QuantityStepper } from '@/components/QuantityStepper'
 import { ResponsiveImage } from '@/components/ResponsiveImage'
+import { addToCart } from '@/utils/cart'
+import { openCart } from '@/utils/cartOverlay'
 import { formatPrice } from '@/utils/pricing'
 import { splitBeforeLastWord } from '@/utils/productName'
 import { getProduct } from '@/utils/products'
@@ -30,9 +32,8 @@ export const Route = createFileRoute('/product/$slug')({
 /**
  * The top of the product page: what this is and what it costs.
  *
- * The quantity lives here rather than in the stepper, because the next feature
- * reads it when wiring add-to-cart. Add-to-cart itself renders but does nothing
- * — no cart exists yet.
+ * The quantity lives here rather than in the stepper, because Add to Cart
+ * reads it.
  *
  * Every image below sizes itself from its own crop: each shipped file's aspect
  * ratio matches its box in the design exactly (the mobile gallery crop is
@@ -99,8 +100,17 @@ function ProductPage() {
 
           <div className="mt-8 flex items-center gap-4">
             <QuantityStepper value={quantity} onChange={setQuantity} />
-            {/* Renders and is reachable, but the cart does not exist yet. */}
-            <Button variant="primary">Add to Cart</Button>
+            {/* Adding opens the cart: the header has no badge, so nothing
+                else on screen could show that it worked. */}
+            <Button
+              variant="primary"
+              onClick={() => {
+                addToCart(product.slug, quantity)
+                openCart()
+              }}
+            >
+              Add to Cart
+            </Button>
           </div>
         </div>
       </div>
