@@ -106,6 +106,13 @@
   --text-body--line-height: 25px;
   --text-body--font-weight: 500;
 
+  /* The price beside a cart line, and the same figure in the order summary.
+     14px is a step below Body and appears nowhere else in the design system's
+     own scale, so it is named here rather than written as a size override. */
+  --text-line-price: 14px;
+  --text-line-price--line-height: 25px;
+  --text-line-price--font-weight: 700;
+
   /* Control type — smaller than the documented scale, used only by form
      fields, buttons and the quantity stepper */
   --text-label: 12px;

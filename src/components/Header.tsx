@@ -1,5 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
+import { Cart } from './Cart'
 import { MobileMenu } from './MobileMenu'
+import { openCart } from '@/utils/cartOverlay'
 import { CATEGORIES } from '@/utils/products'
 
 /**
@@ -11,11 +13,9 @@ import { CATEGORIES } from '@/utils/products'
  * from the accessibility tree rather than merely hiding it — so assistive
  * technology never meets the same links twice.
  *
- * The cart control renders but does nothing: no cart exists until the next
- * feature. It stays enabled and focusable, because `disabled` removes a control
- * from the tab order and this ticket asks every control here to be keyboard
- * reachable. It is named "Cart" rather than "Cart, empty" — there is no cart to
- * describe the state of yet.
+ * The cart control opens the cart. It is named "Cart" rather than reporting a
+ * count, because the design gives it no badge to report one with — which is
+ * also why adding something opens the cart rather than changing the header.
  */
 const navLink =
   'text-nav hover:text-orange focus-ring-on-dark transition-colors'
@@ -81,6 +81,7 @@ export function Header() {
         <button
           type="button"
           aria-label="Cart"
+          onClick={openCart}
           className="focus-ring-on-dark -m-1.5 ml-auto shrink-0 p-1.5 xl:ml-0"
         >
           <img
@@ -91,6 +92,10 @@ export function Header() {
           />
         </button>
       </div>
+
+      {/* Lives here because the header is on every page, and the cart has to
+          be reachable from all of them. */}
+      <Cart />
     </header>
   )
 }
